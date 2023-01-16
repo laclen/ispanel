@@ -1,8 +1,13 @@
 {
   "expo": {
-    "name": "LIM10",
+    "name": "LİM10",
     "slug": "ispanel",
     "version": "1.0.0",
-    "assetBundlePatterns": ["**/*"]
+    "assetBundlePatterns": ["**/*"],
+    "extra": {
+      "eas": {
+        "projectId": "bdc80da4-8623-42a8-937b-4d18e31e4202"
+      }
+    }
   }
 }

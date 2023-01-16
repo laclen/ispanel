@@ -1,5 +1,5 @@
 import WebView from "react-native-webview";
-import { StatusBar, setStatusBarStyle } from "expo-status-bar";
+import { StatusBar, setStatusBarStyle, setStatusBarBackgroundColor } from "expo-status-bar";
 import BackButton from "./components/BackButton";
 import isFirstLaunch from "./utils/DetectFirstLaunch";
 import { getStatusBarHeight } from "react-native-safearea-height";
@@ -90,15 +90,14 @@ export default function App() {
 
   return (
     <View style={styles.container}>
-      {PLATFORM === "ios" && <StatusBar style="light" />}
       {PLATFORM === "ios" ? (
         <WebView
           pullToRefreshEnabled
           source={{ uri: "https://lim10medya.com/ispanel" }}
           ref={webViewRef}
           onNavigationStateChange={(navState) => {
+            setStatusBarStyle("light");
             setCanGoBack(navState.canGoBack);
-            setStatusBarStyle("dark");
           }}
           allowsBackForwardNavigationGestures // only works with iOS
           allowsInlineMediaPlayback
@@ -125,7 +124,11 @@ export default function App() {
           <WebView
             source={{ uri: "https://lim10medya.com/ispanel" }}
             ref={webViewRef}
-            onNavigationStateChange={(navState) => setCanGoBack(navState.canGoBack)}
+            onNavigationStateChange={(navState) => {
+              setCanGoBack(navState.canGoBack);
+              setStatusBarStyle("light");
+              setStatusBarBackgroundColor("black", true);
+            }}
             allowsBackForwardNavigationGestures // only works with iOS
             allowsInlineMediaPlayback
             javaScriptEnabled

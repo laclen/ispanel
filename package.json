@@ -18,7 +18,7 @@
     "react-native": "0.70.5",
     "react-native-permissions": "^3.6.1",
     "react-native-safearea-height": "^1.0.5",
-    "react-native-webview": "^11.26.0",
+    "react-native-webview": "11.23.1",
     "typescript": "^4.6.3"
   },
   "devDependencies": {
