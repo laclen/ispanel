@@ -8,6 +8,7 @@
     "web": "expo start --web"
   },
   "dependencies": {
+    "@react-native-async-storage/async-storage": "~1.17.3",
     "@types/react": "~18.0.24",
     "@types/react-native": "~0.70.6",
     "expo": "~47.0.12",
@@ -16,10 +17,9 @@
     "react": "18.1.0",
     "react-native": "0.70.5",
     "react-native-permissions": "^3.6.1",
-    "react-native-responsive-screen": "^1.4.2",
+    "react-native-safearea-height": "^1.0.5",
     "react-native-webview": "^11.26.0",
-    "typescript": "^4.6.3",
-    "@react-native-async-storage/async-storage": "~1.17.3"
+    "typescript": "^4.6.3"
   },
   "devDependencies": {
     "@babel/core": "^7.12.9"

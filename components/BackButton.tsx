@@ -1,5 +1,4 @@
-import { StyleSheet, TouchableOpacity, Platform, GestureResponderEvent } from "react-native";
-import { heightPercentageToDP as hp, widthPercentageToDP as wp } from "react-native-responsive-screen";
+import { StyleSheet, TouchableOpacity, GestureResponderEvent } from "react-native";
 import { FontAwesome } from "@expo/vector-icons";
 
 const BackButton = (props: { onPress: (event: GestureResponderEvent) => void }) => {
@@ -14,16 +13,16 @@ export default BackButton;
 
 const styles = StyleSheet.create({
   button: {
-    height: Platform.OS === "ios" ? hp(5.5) : hp(6),
-    width: Platform.OS === "ios" ? wp(10) : wp(10),
+    height: 45,
+    width: 45,
 
     alignItems: "center",
     justifyContent: "center",
 
-    borderRadius: 20,
+    borderRadius: 45 / 2,
     backgroundColor: "black",
     shadowColor: "black",
 
-    elevation: 10,
+    elevation: 16,
   },
 });

@@ -1,12 +1,12 @@
 import WebView from "react-native-webview";
-import { StatusBar } from "expo-status-bar";
+import { StatusBar, setStatusBarStyle } from "expo-status-bar";
 import BackButton from "./components/BackButton";
-import { useEffect, useRef, useState } from "react";
 import isFirstLaunch from "./utils/DetectFirstLaunch";
+import { getStatusBarHeight } from "react-native-safearea-height";
+import { useEffect, useRef, useState, useLayoutEffect } from "react";
 import { WebViewScrollEvent } from "react-native-webview/lib/WebViewTypes";
 import { check, request, PERMISSIONS, RESULTS } from "react-native-permissions";
 import { StyleSheet, View, Platform, Alert, Linking, RefreshControl, ScrollView, BackHandler } from "react-native";
-import { heightPercentageToDP as hp, widthPercentageToDP as wp } from "react-native-responsive-screen";
 
 export default function App() {
   const webViewRef = useRef<WebView>();
@@ -17,9 +17,26 @@ export default function App() {
   const [refresherEnabled, setEnableRefresher] = useState(true);
 
   const getSettings = () => Linking.openSettings();
-  const onBackPress = () => (webViewRef.current ? webViewRef.current.goBack() : null);
+  const onBackPress = () => {
+    if (webViewRef.current) {
+      webViewRef.current.goBack();
+      return true;
+    } else {
+      return false;
+    }
+  };
   const handleScroll = (e: WebViewScrollEvent) =>
     Number(e.nativeEvent.contentOffset.y) === 0 ? setEnableRefresher(true) : setEnableRefresher(false);
+
+  // enable android hardwareBackPress for webview pages
+  useLayoutEffect(() => {
+    if (PLATFORM === "android") {
+      BackHandler.addEventListener("hardwareBackPress", onBackPress);
+      return () => {
+        BackHandler.removeEventListener("hardwareBackPress", onBackPress);
+      };
+    }
+  }, []);
 
   useEffect(() => {
     const getPermissions = async () => {
@@ -79,7 +96,10 @@ export default function App() {
           pullToRefreshEnabled
           source={{ uri: "https://lim10medya.com/ispanel" }}
           ref={webViewRef}
-          onNavigationStateChange={(navState) => setCanGoBack(navState.canGoBack)}
+          onNavigationStateChange={(navState) => {
+            setCanGoBack(navState.canGoBack);
+            setStatusBarStyle("dark");
+          }}
           allowsBackForwardNavigationGestures // only works with iOS
           allowsInlineMediaPlayback
           javaScriptEnabled
@@ -133,13 +153,13 @@ const styles = StyleSheet.create({
   webview: {
     flex: 1,
     zIndex: 1,
-    marginTop: Platform.OS === "ios" ? hp(2.7) : hp(3.5),
+    marginTop: getStatusBarHeight(),
   },
   buttonWrapper: {
     zIndex: 2,
     position: "absolute",
-    top: Platform.OS === "ios" ? hp(87.72) : hp(86.95),
-    left: Platform.OS === "ios" ? wp(5) : wp(5),
+    bottom: 30,
+    left: 30,
 
     borderRadius: 20,
     shadowColor: "black",
