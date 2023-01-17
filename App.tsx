@@ -171,6 +171,11 @@ export default function App() {
             scalesPageToFit
             style={styles.webview}
             onScroll={handleScroll}
+            renderLoading={() => (
+              <View style={styles.webviewLoading}>
+                <ActivityIndicator size="large" color="rgb(254,204,1)" />
+              </View>
+            )}
           />
         </ScrollView>
       )}
