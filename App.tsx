@@ -1,7 +1,7 @@
 import WebView from "react-native-webview";
 import { StatusBar, setStatusBarStyle } from "expo-status-bar";
 import BackButton from "./components/BackButton";
-import isFirstLaunch from "./utils/DetectFirstLaunch";
+import isFirstLaunch from "./utils/detectFirstLaunch";
 import { getStatusBarHeight } from "react-native-safearea-height";
 import { useEffect, useRef, useState, useLayoutEffect } from "react";
 import { WebViewNavigation, WebViewScrollEvent } from "react-native-webview/lib/WebViewTypes";
@@ -31,7 +31,7 @@ export default function App() {
   const getSettings = () => Linking.openSettings();
 
   // back to previous webview page
-  const onBackPress = () => {
+  const onBackPress = (): boolean => {
     if (webViewRef.current) {
       webViewRef.current.goBack();
       return true;
@@ -50,16 +50,26 @@ export default function App() {
     navState.url !== "https://lim10medya.com/ispanel/login/index" &&
     navState.url !== "https://lim10medya.com/ispanel/#!" &&
     navState.url !== "https://lim10medya.com/ispanel/anasayfa" &&
-    navState.url !== "https://lim10medya.com/ispanel/anasayfa#!";
+    navState.url !== "https://lim10medya.com/ispanel/anasayfa#!" &&
+    navState.url !== "https://lim10medya.com/ispanel/anasayfa/index#" &&
+    navState.url !== "https://lim10medya.com/ispanel/anasayfa/index#!";
+
+  // onNavigationStateChange, manage backbutton availability, and
+  // set statusbar to light text everytime state changes
+  // because it's bugged in ios
+  const handleNavigatioStateChange = (navState: WebViewNavigation): void => {
+    setStatusBarStyle("light");
+    checkBackButtonAvailability(navState) ? setShowBackButton(true) : setShowBackButton(false);
+  };
 
   // scroll handler to manually enable PullToRefresh property for android
-  const handleScroll = (e: WebViewScrollEvent) =>
+  const handleScroll = (e: WebViewScrollEvent): void =>
     Number(e.nativeEvent.contentOffset.y) === 0 ? setEnableRefresher(true) : setEnableRefresher(false);
 
   // get camera and photo library permissions for users' profile picture preferences
   useEffect(() => {
     const getPermissions = async () => {
-      const firstLaunch = await isFirstLaunch();
+      const firstLaunch: Boolean = await isFirstLaunch();
       await check(PLATFORM === "ios" ? PERMISSIONS.IOS.CAMERA : PERMISSIONS.ANDROID.CAMERA).then((result) => {
         if (result !== RESULTS.GRANTED && result !== RESULTS.UNAVAILABLE) {
           request(PLATFORM === "ios" ? PERMISSIONS.IOS.CAMERA : PERMISSIONS.ANDROID.CAMERA).then((response) => {
@@ -124,10 +134,7 @@ export default function App() {
           pullToRefreshEnabled
           source={{ uri: "https://lim10medya.com/ispanel" }}
           ref={webViewRef}
-          onNavigationStateChange={(navState) => {
-            setStatusBarStyle("light");
-            checkBackButtonAvailability(navState) ? setShowBackButton(true) : setShowBackButton(false);
-          }}
+          onNavigationStateChange={(navState) => handleNavigatioStateChange(navState)}
           allowsBackForwardNavigationGestures // only works with iOS
           allowsInlineMediaPlayback
           javaScriptEnabled
@@ -159,9 +166,7 @@ export default function App() {
           <WebView
             source={{ uri: "https://lim10medya.com/ispanel" }}
             ref={webViewRef}
-            onNavigationStateChange={(navState) => {
-              checkBackButtonAvailability(navState) ? setShowBackButton(true) : setShowBackButton(false);
-            }}
+            onNavigationStateChange={(navState) => handleNavigatioStateChange(navState)}
             allowsBackForwardNavigationGestures // only works with iOS
             allowsInlineMediaPlayback
             javaScriptEnabled
@@ -196,9 +201,10 @@ const styles = StyleSheet.create({
     flex: 1,
     zIndex: 1,
     marginTop: getStatusBarHeight(),
+    backgroundColor: "black",
   },
   webviewLoading: {
-    flex: 1,
+    flex: 200,
     backgroundColor: "black",
 
     justifyContent: "center",
