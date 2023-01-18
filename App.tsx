@@ -1,10 +1,10 @@
 import WebView from "react-native-webview";
-import { StatusBar, setStatusBarStyle, setStatusBarBackgroundColor } from "expo-status-bar";
+import { StatusBar, setStatusBarStyle } from "expo-status-bar";
 import BackButton from "./components/BackButton";
 import isFirstLaunch from "./utils/DetectFirstLaunch";
 import { getStatusBarHeight } from "react-native-safearea-height";
 import { useEffect, useRef, useState, useLayoutEffect } from "react";
-import { WebViewScrollEvent } from "react-native-webview/lib/WebViewTypes";
+import { WebViewNavigation, WebViewScrollEvent } from "react-native-webview/lib/WebViewTypes";
 import { check, request, PERMISSIONS, RESULTS } from "react-native-permissions";
 import {
   StyleSheet,
@@ -18,15 +18,16 @@ import {
   ActivityIndicator,
 } from "react-native";
 
+const PLATFORM = Platform.OS;
+
 export default function App() {
   const webViewRef = useRef<WebView>();
-  const PLATFORM = Platform.OS;
 
-  const [navState, setNavState] = useState(null);
   const [showBackButton, setShowBackButton] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [refresherEnabled, setEnableRefresher] = useState(true);
 
+  // opens app settings
   const getSettings = () => Linking.openSettings();
 
   // back to previous webview page
@@ -39,8 +40,8 @@ export default function App() {
     }
   };
 
-  // manage back button displayement
-  const checkBackButtonAvailability = (): Boolean =>
+  // manage back button availability, display it when not in login or main page
+  const checkBackButtonAvailability = (navState: WebViewNavigation): Boolean =>
     navState &&
     navState.canGoBack &&
     navState.url !== "https://lim10medya.com/ispanel/login/login" &&
@@ -51,20 +52,11 @@ export default function App() {
     navState.url !== "https://lim10medya.com/ispanel/anasayfa" &&
     navState.url !== "https://lim10medya.com/ispanel/anasayfa#!";
 
-  // scroll handler used to enable PullToRefresh property for android
+  // scroll handler to manually enable PullToRefresh property for android
   const handleScroll = (e: WebViewScrollEvent) =>
     Number(e.nativeEvent.contentOffset.y) === 0 ? setEnableRefresher(true) : setEnableRefresher(false);
 
-  // enable android hardwareBackPress for webview pages
-  useLayoutEffect(() => {
-    if (PLATFORM === "android" && showBackButton) {
-      BackHandler.addEventListener("hardwareBackPress", onBackPress);
-      return () => {
-        BackHandler.removeEventListener("hardwareBackPress", onBackPress);
-      };
-    }
-  }, [showBackButton]);
-
+  // get camera and photo library permissions for users' profile picture preferences
   useEffect(() => {
     const getPermissions = async () => {
       const firstLaunch = await isFirstLaunch();
@@ -115,6 +107,16 @@ export default function App() {
     getPermissions();
   }, []);
 
+  // enable android hardwareBackPress for webview pages, depending on custom back button's state
+  useLayoutEffect(() => {
+    if (PLATFORM === "android" && showBackButton) {
+      BackHandler.addEventListener("hardwareBackPress", onBackPress);
+      return () => {
+        BackHandler.removeEventListener("hardwareBackPress", onBackPress);
+      };
+    }
+  }, [showBackButton]);
+
   return (
     <View style={styles.container}>
       {PLATFORM === "ios" ? (
@@ -124,19 +126,18 @@ export default function App() {
           ref={webViewRef}
           onNavigationStateChange={(navState) => {
             setStatusBarStyle("light");
-            setNavState(navState);
-            checkBackButtonAvailability() ? setShowBackButton(true) : setShowBackButton(false);
+            checkBackButtonAvailability(navState) ? setShowBackButton(true) : setShowBackButton(false);
           }}
           allowsBackForwardNavigationGestures // only works with iOS
           allowsInlineMediaPlayback
           javaScriptEnabled
           javaScriptCanOpenWindowsAutomatically
-          startInLoadingState
           renderLoading={() => (
             <View style={styles.webviewLoading}>
               <ActivityIndicator size="large" color="rgb(254,204,1)" />
             </View>
           )}
+          startInLoadingState
           style={styles.webview}
         />
       ) : (
@@ -154,15 +155,12 @@ export default function App() {
             />
           }
         >
-          <StatusBar style="light" backgroundColor="black" translucent />
+          <StatusBar style="light" backgroundColor="black" />
           <WebView
             source={{ uri: "https://lim10medya.com/ispanel" }}
             ref={webViewRef}
             onNavigationStateChange={(navState) => {
-              setStatusBarStyle("light");
-              setStatusBarBackgroundColor("black", true);
-              setNavState(navState);
-              checkBackButtonAvailability() ? setShowBackButton(true) : setShowBackButton(false);
+              checkBackButtonAvailability(navState) ? setShowBackButton(true) : setShowBackButton(false);
             }}
             allowsBackForwardNavigationGestures // only works with iOS
             allowsInlineMediaPlayback
@@ -176,6 +174,7 @@ export default function App() {
                 <ActivityIndicator size="large" color="rgb(254,204,1)" />
               </View>
             )}
+            startInLoadingState
           />
         </ScrollView>
       )}
