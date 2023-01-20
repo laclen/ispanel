@@ -16,9 +16,11 @@ import {
   ScrollView,
   BackHandler,
   ActivityIndicator,
+  Dimensions,
 } from "react-native";
 
 const PLATFORM = Platform.OS;
+const { height, width } = Dimensions.get("window");
 
 export default function App() {
   const webViewRef = useRef<WebView>();
@@ -139,17 +141,13 @@ export default function App() {
           allowsInlineMediaPlayback
           javaScriptEnabled
           javaScriptCanOpenWindowsAutomatically
-          renderLoading={() => (
-            <View style={styles.webviewLoading}>
-              <ActivityIndicator size="large" color="rgb(254,204,1)" />
-            </View>
-          )}
+          renderLoading={() => <ActivityIndicator size="large" color="yellow" style={styles.webviewLoading} />}
           startInLoadingState
           style={styles.webview}
         />
       ) : (
         <ScrollView
-          contentContainerStyle={{ flex: 1 }}
+          contentContainerStyle={styles.container}
           refreshControl={
             <RefreshControl
               refreshing={refreshing}
@@ -166,19 +164,14 @@ export default function App() {
           <WebView
             source={{ uri: "https://lim10medya.com/ispanel" }}
             ref={webViewRef}
+            style={styles.webview}
             onNavigationStateChange={(navState) => handleNavigatioStateChange(navState)}
             allowsBackForwardNavigationGestures // only works with iOS
             allowsInlineMediaPlayback
             javaScriptEnabled
             javaScriptCanOpenWindowsAutomatically
-            scalesPageToFit
-            style={styles.webview}
             onScroll={handleScroll}
-            renderLoading={() => (
-              <View style={styles.webviewLoading}>
-                <ActivityIndicator size="large" color="rgb(254,204,1)" />
-              </View>
-            )}
+            renderLoading={() => <ActivityIndicator size="large" color="yellow" style={styles.webviewLoading} />}
             startInLoadingState
           />
         </ScrollView>
@@ -204,11 +197,7 @@ const styles = StyleSheet.create({
     backgroundColor: "black",
   },
   webviewLoading: {
-    flex: 200,
-    backgroundColor: "black",
-
-    justifyContent: "center",
-    alignItems: "center",
+    marginBottom: height / 2 - 20,
   },
   buttonWrapper: {
     zIndex: 2,
